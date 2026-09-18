@@ -1,8 +1,6 @@
-# Project place file
-/my-roblox-game.rbxlx
-
-# Roblox Studio lock files
-/*.rbxlx.lock
-/*.rbxl.lock
-
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
 sourcemap.json
+.DS_Store
