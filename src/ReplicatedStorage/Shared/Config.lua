@@ -1,208 +1,97 @@
 --!strict
 --[[
-	Steal a Crystal — central tunables.
-	Adjust values here; services read Config at runtime.
+	Steal a Crystal — tunables.
 ]]
 
 local Config = {}
 
---------------------------------------------------------------------------------
--- Economy
---------------------------------------------------------------------------------
 Config.StartingCoins = 0
 Config.StartingCarryCapacity = 1
-Config.MaxCarryCapacity = 3
+Config.MaxCarryCapacity = 5
 
---------------------------------------------------------------------------------
--- Crystal rarities (spawnWeight is relative; higher = more common)
---------------------------------------------------------------------------------
 Config.Rarities = {
-	Common = {
-		displayName = "Common",
-		color = Color3.fromRGB(120, 200, 255),
-		value = 10,
-		size = 1.2,
-		spawnWeight = 50,
-		glow = 0.3,
-	},
-	Rare = {
-		displayName = "Rare",
-		color = Color3.fromRGB(80, 255, 120),
-		value = 35,
-		size = 1.5,
-		spawnWeight = 30,
-		glow = 0.5,
-	},
-	Epic = {
-		displayName = "Epic",
-		color = Color3.fromRGB(180, 80, 255),
-		value = 100,
-		size = 1.8,
-		spawnWeight = 15,
-		glow = 0.7,
-	},
-	Legendary = {
-		displayName = "Legendary",
-		color = Color3.fromRGB(255, 180, 40),
-		value = 300,
-		size = 2.2,
-		spawnWeight = 5,
-		glow = 1.0,
-	},
+	Common = { displayName = "Common", color = Color3.fromRGB(120, 200, 255), value = 12, size = 1.2, spawnWeight = 48, glow = 0.35 },
+	Rare = { displayName = "Rare", color = Color3.fromRGB(80, 255, 140), value = 40, size = 1.5, spawnWeight = 28, glow = 0.55 },
+	Epic = { displayName = "Epic", color = Color3.fromRGB(190, 90, 255), value = 120, size = 1.85, spawnWeight = 16, glow = 0.8 },
+	Legendary = { displayName = "Legendary", color = Color3.fromRGB(255, 185, 50), value = 340, size = 2.25, spawnWeight = 6, glow = 1.15 },
+	Mythic = { displayName = "Mythic", color = Color3.fromRGB(255, 70, 110), value = 800, size = 2.6, spawnWeight = 2, glow = 1.4 },
 }
 
-Config.RarityOrder = { "Common", "Rare", "Epic", "Legendary" }
+Config.RarityOrder = { "Common", "Rare", "Epic", "Legendary", "Mythic" }
 
---------------------------------------------------------------------------------
--- Wild zone crystal spawning
---------------------------------------------------------------------------------
 Config.WildZone = {
 	center = Vector3.new(0, 2, 0),
-	size = Vector3.new(80, 1, 80), -- XZ footprint
-	spawnHeight = 3,
-	maxCrystals = 28,
-	respawnDelay = 4, -- seconds after pickup before a new one can spawn
-	spawnInterval = 2, -- check interval
+	size = Vector3.new(160, 1, 160),
+	spawnHeight = 3.2,
+	maxCrystals = 48,
+	respawnDelay = 3,
+	spawnInterval = 1.6,
 }
 
---------------------------------------------------------------------------------
--- Player bases / plots
---------------------------------------------------------------------------------
 Config.Base = {
-	plotSize = Vector3.new(28, 1, 28),
-	plotSpacing = 36, -- center-to-center
-	pedestalSlots = 6,
-	pedestalRadius = 8,
-	sellPadSize = Vector3.new(6, 0.5, 6),
-	wallHeight = 4,
-	maxPlots = 8,
-	-- Ring layout around wild zone
-	ringRadius = 70,
-	floorColor = Color3.fromRGB(45, 55, 75),
-	accentColor = Color3.fromRGB(90, 140, 220),
-	lockDuration = 8, -- seconds of base lock after placing (if upgraded)
+	plotSize = Vector3.new(36, 1, 36),
+	plotSpacing = 48,
+	pedestalSlots = 8,
+	pedestalRadius = 10,
+	sellPadSize = Vector3.new(7, 0.5, 7),
+	wallHeight = 5,
+	maxPlots = 12,
+	ringRadius = 150,
+	floorColor = Color3.fromRGB(38, 48, 68),
+	accentColor = Color3.fromRGB(80, 130, 210),
+	lockDuration = 10,
 }
 
---------------------------------------------------------------------------------
--- Stealing
---------------------------------------------------------------------------------
 Config.Steal = {
-	promptHoldDuration = 0.6,
+	promptHoldDuration = 0.7,
 	promptMaxDistance = 10,
 	dropOnOwnerTouch = true,
-	carryAttachOffset = Vector3.new(0, 2.5, 0),
+	carryAttachOffset = Vector3.new(0, 2.6, 0),
+	wantedDuration = 28,
 }
 
---------------------------------------------------------------------------------
--- Shop upgrades (coin costs; effects applied server-side)
---------------------------------------------------------------------------------
+Config.Cops = {
+	enabled = true,
+	count = 6,
+	walkSpeed = 18,
+	chaseSpeed = 23,
+	catchDistance = 5.5,
+	patrolRadius = 95,
+	height = 3,
+}
+
 Config.Shop = {
-	position = Vector3.new(0, 2, -55),
+	position = Vector3.new(0, 2, -95),
 	items = {
-		WalkSpeed1 = {
-			id = "WalkSpeed1",
-			name = "Swift Boots I",
-			description = "Walk speed +4",
-			cost = 50,
-			category = "WalkSpeed",
-			tier = 1,
-			effect = { walkSpeed = 20 }, -- default Roblox is 16
-		},
-		WalkSpeed2 = {
-			id = "WalkSpeed2",
-			name = "Swift Boots II",
-			description = "Walk speed +8",
-			cost = 150,
-			category = "WalkSpeed",
-			tier = 2,
-			requires = "WalkSpeed1",
-			effect = { walkSpeed = 24 },
-		},
-		Carry2 = {
-			id = "Carry2",
-			name = "Crystal Pouch",
-			description = "Carry up to 2 crystals",
-			cost = 75,
-			category = "Carry",
-			tier = 1,
-			effect = { carryCapacity = 2 },
-		},
-		Carry3 = {
-			id = "Carry3",
-			name = "Crystal Backpack",
-			description = "Carry up to 3 crystals",
-			cost = 200,
-			category = "Carry",
-			tier = 2,
-			requires = "Carry2",
-			effect = { carryCapacity = 3 },
-		},
-		Luck1 = {
-			id = "Luck1",
-			name = "Lucky Charm",
-			description = "Better rare spawn luck",
-			cost = 100,
-			category = "Luck",
-			tier = 1,
-			effect = { luckBonus = 0.15 },
-		},
-		Luck2 = {
-			id = "Luck2",
-			name = "Fortune Amulet",
-			description = "Even better legendary luck",
-			cost = 350,
-			category = "Luck",
-			tier = 2,
-			requires = "Luck1",
-			effect = { luckBonus = 0.35 },
-		},
-		BaseLock = {
-			id = "BaseLock",
-			name = "Base Shield",
-			description = "Brief lock after placing a crystal",
-			cost = 120,
-			category = "BaseLock",
-			tier = 1,
-			effect = { baseLock = true },
-		},
+		WalkSpeed1 = { id = "WalkSpeed1", name = "Swift Boots I", description = "Walk speed +4", cost = 50, category = "WalkSpeed", tier = 1, effect = { walkSpeed = 20 } },
+		WalkSpeed2 = { id = "WalkSpeed2", name = "Swift Boots II", description = "Walk speed +8", cost = 160, category = "WalkSpeed", tier = 2, requires = "WalkSpeed1", effect = { walkSpeed = 24 } },
+		WalkSpeed3 = { id = "WalkSpeed3", name = "Swift Boots III", description = "Walk speed +14", cost = 420, category = "WalkSpeed", tier = 3, requires = "WalkSpeed2", effect = { walkSpeed = 30 } },
+		Carry2 = { id = "Carry2", name = "Crystal Pouch", description = "Carry up to 2 crystals", cost = 75, category = "Carry", tier = 1, effect = { carryCapacity = 2 } },
+		Carry3 = { id = "Carry3", name = "Crystal Backpack", description = "Carry up to 3 crystals", cost = 200, category = "Carry", tier = 2, requires = "Carry2", effect = { carryCapacity = 3 } },
+		Carry5 = { id = "Carry5", name = "Vault Sling", description = "Carry up to 5 crystals", cost = 550, category = "Carry", tier = 3, requires = "Carry3", effect = { carryCapacity = 5 } },
+		Luck1 = { id = "Luck1", name = "Lucky Charm", description = "Better rare spawn luck", cost = 100, category = "Luck", tier = 1, effect = { luckBonus = 0.15 } },
+		Luck2 = { id = "Luck2", name = "Fortune Amulet", description = "Better legendary luck", cost = 350, category = "Luck", tier = 2, requires = "Luck1", effect = { luckBonus = 0.35 } },
+		Luck3 = { id = "Luck3", name = "Mythic Relic", description = "Mythic crystals can appear more often", cost = 900, category = "Luck", tier = 3, requires = "Luck2", effect = { luckBonus = 0.6 } },
+		BaseLock = { id = "BaseLock", name = "Base Shield", description = "Brief lock after placing a crystal", cost = 120, category = "BaseLock", tier = 1, effect = { baseLock = true } },
 	},
 }
 
---------------------------------------------------------------------------------
--- Demo NPC (Play Solo steal test)
---------------------------------------------------------------------------------
-Config.NPC = {
-	enabled = true,
-	plotIndex = 1, -- uses first plot slot opposite players if needed
-	name = "Crystal Keeper",
-	crystalRarity = "Rare",
-}
+Config.NPC = { enabled = true, plotIndex = 12, name = "Crystal Keeper", crystalRarity = "Rare" }
 
---------------------------------------------------------------------------------
--- DataStore
---------------------------------------------------------------------------------
-Config.DataStore = {
-	enabled = true,
-	name = "StealACrystal_v1",
-	autoSaveInterval = 60,
-}
+Config.DataStore = { enabled = true, name = "StealACrystal_v2", autoSaveInterval = 45 }
 
---------------------------------------------------------------------------------
--- Tutorial
---------------------------------------------------------------------------------
 Config.Tutorial = {
 	steps = {
-		"Welcome to Steal a Crystal! Walk to the glowing wild zone.",
-		"Pick up a crystal with the prompt, then carry it to YOUR base.",
-		"Place it on a pedestal, then sell on the gold Sell Pad for Coins.",
-		"Visit the Shop to upgrade speed, carry capacity, and luck.",
-		"Steal from other bases (try the NPC base)! Owners can touch you to drop.",
+		"Welcome to Steal a Crystal. The wilds are huge — look for the glowing ring.",
+		"Pick up crystals, carry them to YOUR base, and place them on pedestals.",
+		"Sell on the gold pad for Coins. Spend Coins at the plaza Shop.",
+		"Steal from other bases. Stealing makes you WANTED.",
+		"Cops patrol the map. If they tag you while wanted, you drop everything.",
+		"Sprint with Left Shift. G drops crystals. Get home to go clean.",
 	},
 }
 
---------------------------------------------------------------------------------
--- Defaults for character
---------------------------------------------------------------------------------
 Config.DefaultWalkSpeed = 16
+Config.SprintBonus = 8
 
 return Config
